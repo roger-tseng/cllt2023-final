@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 
 # Parse the XML data
-tree = ET.parse('/content/politics/2020/20200101_2018_M.1577909917.A.8FE.xml')
+tree = ET.parse('/content/data/HatePolitics/2021/20210103_0511_M.1609650710.A.BB8.xml')
 root = tree.getroot()
 
 # Extract metadata
@@ -17,16 +17,9 @@ text = root.find('./text')
 body_author = text.find('./body').get('author')
 title_author = text.find('./title').get('author')
 sentences = text.findall('body/s')
-sentences_and_pairs = [[(word.get('type'), word.text) for word in sent.findall('w')] for sent in sentences]
-# "".join([element.text for element in text.findall('body/s/w')]) # text.find('./title/s').text.strip()
+comments = text.findall('comment')
+comments_pairs = [([(word.get('type'), word.text) for word in c.findall('s/w')], c.get('c_type')) for c in comments]
+sentences_pairs = [[(word.get('type'), word.text) for word in sent.findall('w')] for sent in sentences]
 
-# Print the extracted information
-# print('Metadata:')
-# for name, value in metadata_dict.items():
-#     print(f'{name}: {value}')
-
-# print('\nText Content:')
-# print(f'Body Author: {body_author}')
-# print(f'Title Author: {title_author}')
-# print(f'Sentence: {sentence}')
-print(sentences_and_pairs)
+print(sentences_pairs)
+print(comments_pairs)
