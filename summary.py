@@ -1,4 +1,5 @@
-from transformers import PegasusForConditionalGeneration
+import re
+from transformers import PegasusForConditionalGeneration, AutoTokenizer, AutoModelForSeq2SeqLM
 # Need to download tokenizers_pegasus.py and other Python script from Fengshenbang-LM github repo in advance,
 # or you can download tokenizers_pegasus.py and data_utils.py in https://huggingface.co/IDEA-CCNL/Randeng_Pegasus_523M/tree/main
 # Strongly recommend you git clone the Fengshenbang-LM repo:
@@ -6,23 +7,49 @@ from transformers import PegasusForConditionalGeneration
 # 2. cd Fengshenbang-LM/fengshen/examples/pegasus/
 # and then you will see the tokenizers_pegasus.py and data_utils.py which are needed by pegasus model
 from tokenizers_pegasus import PegasusTokenizer
+from utils import trad_to_simp, simp_to_trad
 
-import opencc
+p_model = PegasusForConditionalGeneration.from_pretrained("IDEA-CCNL/Randeng-Pegasus-523M-Summary-Chinese")
+p_tokenizer = PegasusTokenizer.from_pretrained("IDEA-CCNL/Randeng-Pegasus-523M-Summary-Chinese")
 
-converter = opencc.OpenCC('t2s.json')
-model = PegasusForConditionalGeneration.from_pretrained("IDEA-CCNL/Randeng-Pegasus-523M-Summary-Chinese")
-tokenizer = PegasusTokenizer.from_pretrained("IDEA-CCNL/Randeng-Pegasus-523M-Summary-Chinese")
+WHITESPACE_HANDLER = lambda k: re.sub('\s+', ' ', re.sub('\n+', ' ', k.strip()))
+model_name = "csebuetnlp/mT5_multilingual_XLSum"
+m_tokenizer = AutoTokenizer.from_pretrained(model_name)
+m_model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
 # text = "据微信公众号“界面”报道，4日上午10点左右，中国发改委反垄断调查小组突击查访奔驰上海办事处，调取数据材料，并对多名奔驰高管进行了约谈。截止昨日晚9点，包括北京梅赛德斯-奔驰销售服务有限公司东区总经理在内的多名管理人员仍留在上海办公室内"
-def summarize(text):
+def summarize(text, backend='m'):
     # text is a list of sentences
     doc = "，".join(text) 
-    simplified_doc = converter.convert(doc)
-    inputs = tokenizer(simplified_doc, max_length=1024, return_tensors="pt")
+    if backend == 'p':
+        simplified_doc = trad_to_simp(doc)
+        inputs = p_tokenizer(simplified_doc, max_length=1024, return_tensors="pt")
 
-    # Generate Summary
-    summary_ids = model.generate(inputs["input_ids"])
-    return tokenizer.batch_decode(summary_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
+        # Generate Summary
+        summary_ids = p_model.generate(inputs["input_ids"]) 
+        summary = simp_to_trad(p_tokenizer.batch_decode(summary_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
+    elif backend == 'm':
+        input_ids = m_tokenizer(
+            [WHITESPACE_HANDLER(doc)],
+            return_tensors="pt",
+            padding="max_length",
+            truncation=True,
+            max_length=512
+        )["input_ids"]
+        output_ids = m_model.generate(
+            input_ids=input_ids,
+            max_length=84,
+            no_repeat_ngram_size=2,
+            num_beams=4
+        )[0]
+        summary = m_tokenizer.decode(
+            output_ids,
+            skip_special_tokens=True,
+            clean_up_tokenization_spaces=False
+        )
+    else:
+        raise NotImplementedError
+    return summary
 
 if __name__ == '__main__':
     print(

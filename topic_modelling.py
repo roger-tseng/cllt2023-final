@@ -37,3 +37,6 @@ def topic_model(bag_list, topics=10):
     return ans
 
     # TODO: deal with stopwords
+
+if __name__ == '__main__':
+    pass
