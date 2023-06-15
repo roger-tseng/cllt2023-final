@@ -1,12 +1,15 @@
-# Roadmap
-
-1. Retrival (top-k relevant documents) 
-2. Sentiment Anaylsis
-3. Fact-check (with Wiki)
-4. Named Entity Recognition (most popular figures)
-5. Time series comparison (sentiment over multiple years, most popular figures over the years)
-
-## Demo plan
-1. 2020年，有哪些重要的政治人物 (NER)
-2. 輿論對這個人的評價如何，並且主要在討論什麼事件？
-3. 這個事件的討論（以一句話總結）真實性如何？
+## Tools function
+1. 關鍵人物檢索：請問2022年三月PTT上話題量最大的政治人物有哪些？ \
+答：林智堅
+2. 人物資訊檢索：能否提供一些與他相關的文章？ \
+答：論文抄襲新聞、⋯⋯
+3. 大眾輿情分析：這個月中，輿論對他的風向如何？ \
+答：負面
+4. 聲量趨勢：與他相關的風向在三月到六月內有什麼變化？ \
+答：（由工具製作一按月作圖之折線圖）
+5. 事實查核：這篇文章所述，是否有誇大/謠言的成分？ \
+答：林智堅論文抄襲事件，2022年三月時台大尚未完成調查⋯⋯
+6. 關鍵字整理：2022年三月有哪些話題關鍵字？ \
+答：抄襲、林智堅、論文⋯⋯
+7. 大綱摘要整理：能否幫我為這篇文章做重點整理？ \
+答：新聞指出台大著手調查林智堅抄襲嫌疑事件。
